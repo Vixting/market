@@ -15,7 +15,7 @@ DATA_CENTER = "Light"  # Update as needed
 ITEMS_LIMIT = 100  # Max number of items per request
 PROFIT_MARGIN = 0.1  # Desired profit margin (e.g., 10%)
 MIN_SALES_COUNT = 5  # Min sales to consider an item
-MIN_PROFIT_AMOUNT = 5000  # Min profit to consider an item
+MIN_PROFIT_AMOUNT = 2000  # Min profit to consider an item
 LOOP_DELAY = 4  # Delay between iterations in seconds
 NUM_THREADS = 5  # Number of parallel threads for requests
 COLLECT_LIMIT = 100  # Number of unique item IDs to collect before processing
@@ -73,7 +73,6 @@ def process_batch(item_ids):
                     listing_price = listing['pricePerUnit']
                     profit_from_current = average_price - listing_price
                     margin_profit = listing_price * PROFIT_MARGIN
-                    print(f"Item ID: {item_id}, Listing Price: {listing_price}, Average Price: {average_price}, Min Listing Price: {min_listing_price}, Sales Count: {sales_count}, Profit from Current: {profit_from_current}")
 
                     if profit_from_current >= MIN_PROFIT_AMOUNT and min_listing_price <= margin_profit:
                         below_market_items.append({
@@ -116,7 +115,7 @@ async def handle_messages(websocket):
                     'stainID': listing.get('stainID'),
                     'total': listing.get('total')
                 })
-                
+
             if len(collected_listings) >= COLLECT_LIMIT:
                 item_ids = list(set([listing['item'] for listing in collected_listings]))
                 all_below_market_items = []
@@ -126,11 +125,10 @@ async def handle_messages(websocket):
                     for future in futures:
                         all_below_market_items.extend(future.result())
 
-                # Print or handle the below-market value items
                 for item in all_below_market_items:
-                    print(f"Item ID: {item['item_id']}")
+                    #print server name, item name, profit, sales count, listing price, average price
+                    print(f"{data.get('world')}: {item['item_id']} - {item['profit_from_current']} - {item['sales_count']} - {item['listing_price']} - {item['average_price']}")
 
-                # Clear the collected listings after processing
                 collected_listings.clear()
 
 async def main():
